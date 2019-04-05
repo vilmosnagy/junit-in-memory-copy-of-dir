@@ -9,10 +9,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.NoSuchElementException;
 
 public class InMemoryCopyOfDirectoryExtension implements ParameterResolver {
@@ -34,6 +31,7 @@ public class InMemoryCopyOfDirectoryExtension implements ParameterResolver {
 
     private Path tryToResolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws IOException, URISyntaxException {
         FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
+        String inMemoryFsSeparator = fs.getSeparator();
         Path inMemoryDir = fs.getPath("/inMemoryDir");
         Files.createDirectory(inMemoryDir);
 
@@ -44,7 +42,12 @@ public class InMemoryCopyOfDirectoryExtension implements ParameterResolver {
             .walk(dirToCopyOnFs)
             .forEachOrdered(path -> {
                 try {
-                    Path resolvedPath = inMemoryDir.resolve(dirToCopyOnFs.relativize(path).toString());
+                    String relativePath = dirToCopyOnFs
+                        .relativize(path)
+                        .toString()
+                        .replaceAll(FileSystems.getDefault().getSeparator(), inMemoryFsSeparator);
+
+                    Path resolvedPath = inMemoryDir.resolve(relativePath);
                     if (!Files.isDirectory(path)) {
                         Files.copy(path, resolvedPath);
                     } else if (!Files.exists(resolvedPath)) {
