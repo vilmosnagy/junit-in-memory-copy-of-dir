@@ -45,7 +45,7 @@ public class InMemoryCopyOfDirectoryExtension implements ParameterResolver {
                     String relativePath = dirToCopyOnFs
                         .relativize(path)
                         .toString()
-                        .replaceAll(FileSystems.getDefault().getSeparator(), inMemoryFsSeparator);
+                        .replace(FileSystems.getDefault().getSeparator(), inMemoryFsSeparator);
 
                     Path resolvedPath = inMemoryDir.resolve(relativePath);
                     if (!Files.isDirectory(path)) {
