@@ -15,4 +15,11 @@ repositories {
 dependencies {
     compile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.0'
     compile group: 'com.google.jimfs', name: 'jimfs', version: '1.1'
+
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.3.1'
+}
+
+test {
+    useJUnitPlatform()
 }
