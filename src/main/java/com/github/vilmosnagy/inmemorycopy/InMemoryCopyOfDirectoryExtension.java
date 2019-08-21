@@ -1,18 +1,18 @@
 package com.github.vilmosnagy.inmemorycopy;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.*;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.file.*;
-import java.util.NoSuchElementException;
+import java.util.*;
 
-public class InMemoryCopyOfDirectoryExtension implements ParameterResolver {
+public class InMemoryCopyOfDirectoryExtension implements ParameterResolver, BeforeEachCallback {
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
@@ -23,20 +23,19 @@ public class InMemoryCopyOfDirectoryExtension implements ParameterResolver {
     @Override
     public Path resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         try {
-            return tryToResolveParameter(parameterContext, extensionContext);
+            return tryToResolveParameter(parameterContext.findAnnotation(InMemoryCopyOfDirectory.class).orElseThrow(NoSuchElementException::new), extensionContext.getTestClass().orElseThrow(NoSuchElementException::new));
         } catch (Exception e) {
             throw new ParameterResolutionException("", e);
         }
     }
 
-    private Path tryToResolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws IOException, URISyntaxException {
+    private Path tryToResolveParameter(InMemoryCopyOfDirectory annotation, Class<?> testClass) throws IOException, URISyntaxException {
         FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
         String inMemoryFsSeparator = fs.getSeparator();
         Path inMemoryDir = fs.getPath("/inMemoryDir");
         Files.createDirectory(inMemoryDir);
 
-        InMemoryCopyOfDirectory annotation = parameterContext.findAnnotation(InMemoryCopyOfDirectory.class).orElseThrow(NoSuchElementException::new);
-        Path dirToCopyOnFs = Paths.get(extensionContext.getTestClass().orElseThrow(NoSuchElementException::new).getResource(annotation.value()).toURI());
+        Path dirToCopyOnFs = Paths.get(testClass.getResource(annotation.value()).toURI());
 
         Files
             .walk(dirToCopyOnFs)
@@ -60,5 +59,36 @@ public class InMemoryCopyOfDirectoryExtension implements ParameterResolver {
             });
 
         return inMemoryDir;
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext context) throws Exception {
+        context
+            .getTestClass()
+            .map(this::getDeclaredFieldsFromClass)
+            .orElse(Collections.emptySet())
+            .stream()
+            .filter(it -> it.getAnnotation(InMemoryCopyOfDirectory.class) != null)
+            .filter(it -> it.getType().isAssignableFrom(Path.class))
+            .forEach(field -> {
+                try {
+                    Path path = tryToResolveParameter(field.getAnnotation(InMemoryCopyOfDirectory.class), context.getTestClass().orElseThrow(NoSuchElementException::new));
+                    field.setAccessible(true);
+                    field.set(context.getTestInstance().orElseThrow(NoSuchElementException::new), path);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            });
+    }
+
+    private Set<Field> getDeclaredFieldsFromClass(Class<?> testClass) {
+        if (testClass.getSuperclass() != null) {
+            return Sets.union(
+                getDeclaredFieldsFromClass(testClass.getSuperclass()),
+                Sets.newHashSet(testClass.getDeclaredFields())
+            );
+        } else {
+            return Sets.newHashSet(testClass.getDeclaredFields());
+        }
     }
 }

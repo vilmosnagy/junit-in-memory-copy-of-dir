@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="in-memory-copy-of-dir.main" target="1.8" />
+      <module name="in-memory-copy-of-dir.test" target="1.8" />
       <module name="in-memory-copy-of-dir_main" target="1.8" />
       <module name="in-memory-copy-of-dir_test" target="1.8" />
     </bytecodeTargetLevel>

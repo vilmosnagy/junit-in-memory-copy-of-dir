@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir.iml" filepath="$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir_main.iml" filepath="$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir_main.iml" group="in-memory-copy-of-dir" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir_test.iml" filepath="$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir_test.iml" group="in-memory-copy-of-dir" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir.main.iml" filepath="$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir.test.iml" filepath="$PROJECT_DIR$/.idea/modules/in-memory-copy-of-dir.test.iml" />
     </modules>
   </component>
 </project>
