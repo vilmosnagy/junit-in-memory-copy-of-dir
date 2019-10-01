@@ -32,7 +32,7 @@ public class InMemoryCopyOfDirectoryExtension implements ParameterResolver, Befo
     private Path tryToResolveParameter(InMemoryCopyOfDirectory annotation, Class<?> testClass) throws IOException, URISyntaxException {
         FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
         String inMemoryFsSeparator = fs.getSeparator();
-        Path inMemoryDir = fs.getPath("/inMemoryDir");
+        Path inMemoryDir = fs.getPath("/" + UUID.randomUUID());
         Files.createDirectory(inMemoryDir);
 
         Path dirToCopyOnFs = Paths.get(testClass.getResource(annotation.value()).toURI());
